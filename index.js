@@ -8,7 +8,7 @@ import { notFound, errorHandler } from "./verifyJwt.js";
 import bookRoutes from "./routes/books.js";
 import borrowRoutes from "./routes/borrows.js";
 
-const requiredEnv = ["MONGODB_URL", "DB_NAME", "CLIENT_URL"];
+const requiredEnv = ["MONGODB_URL", "DB_NAME"];
 const missingEnv = requiredEnv.find((name) => !process.env[name]?.trim());
 
 if (missingEnv) {
@@ -17,11 +17,16 @@ if (missingEnv) {
 
 const app = express();
 
-const CLIENT_URL = process.env.CLIENT_URL.trim().replace(/\/+$/, "");
+// Both the local and the deployed frontend are always allowed.
+// CLIENT_URL from the environment is added too (if it is set).
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://read-mera.vercel.app",
+];
 
-const allowedOrigins = [CLIENT_URL];
-if (process.env.NODE_ENV !== "production") {
-  allowedOrigins.push(process.env.CLIENT_URL?.trim().replace(/\/+$/, "") || "http://localhost:3000");
+const envClientUrl = process.env.CLIENT_URL?.trim().replace(/\/+$/, "");
+if (envClientUrl && !allowedOrigins.includes(envClientUrl)) {
+  allowedOrigins.push(envClientUrl);
 }
 
 app.use(
@@ -31,7 +36,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      console.warn("CORS blocked origin:", origin);
+      console.warn("CORS blocked origin:", origin, "| allowed:", allowedOrigins.join(", "));
       return callback(null, false);
     },
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
@@ -60,7 +65,6 @@ app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "ReadMera API is running.",
-   
   });
 });
 
