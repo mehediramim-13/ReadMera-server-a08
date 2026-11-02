@@ -60,7 +60,7 @@ app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "ReadMera API is running.",
-    paths: ["GET /api/health", "GET /api/books"],
+   
   });
 });
 
