@@ -21,7 +21,7 @@ const CLIENT_URL = process.env.CLIENT_URL.trim().replace(/\/+$/, "");
 
 const allowedOrigins = [CLIENT_URL];
 if (process.env.NODE_ENV !== "production") {
-  allowedOrigins.push("http://localhost:3000");
+  allowedOrigins.push(process.env.CLIENT_URL?.trim().replace(/\/+$/, "") || "http://localhost:3000");
 }
 
 app.use(
